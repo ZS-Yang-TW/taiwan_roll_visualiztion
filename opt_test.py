@@ -6,7 +6,7 @@ import json
 with open("voting_results.json", "r") as file:
     voting_results = json.load(file)
 
-# 初始化新的字典用於儲存計算结果 
+# 初始化新的字典用於儲存計算结果
 percentages = {}
 winners = {}
 votes_difference = {}
