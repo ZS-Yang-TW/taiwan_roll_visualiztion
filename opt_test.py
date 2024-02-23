@@ -34,7 +34,7 @@ for city, total_votes in voting_results["district_total"].items():
         "kmt": (212, 100, int(85 - 40 * ratio)),
     }
     
-    # 根據獲勝者的黨派，計算 HSL 值
+    # 根據獲勝者的黨派，計算 HSL 值 
     hsl = f"hsl({hsl_values[winner_party][0]}, {hsl_values[winner_party][1]}%, {hsl_values[winner_party][2]}%)"
     rgb_hex = ImageColor.getrgb(hsl)
     colors[city] = f"#{rgb_hex[0]:02x}{rgb_hex[1]:02x}{rgb_hex[2]:02x}"
