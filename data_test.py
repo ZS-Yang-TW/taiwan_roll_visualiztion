@@ -24,7 +24,7 @@ for city in voting_results["tpp"]:
     voting_results.setdefault("dpp_percentage", {})[city] = dpp_percentage
     voting_results.setdefault("kmt_percentage", {})[city] = kmt_percentage
     voting_results.setdefault("tpp_percentage", {})[city] = tpp_percentage
-
+    
 print(voting_results["dpp_percentage"])
 print(voting_results["kmt_percentage"])
 print(voting_results["tpp_percentage"])
@@ -32,18 +32,32 @@ print(voting_results["tpp_percentage"])
 # 計算各區域獲勝者 1-TPP, 2-DPP, 3-KMT ，並將結果存入新的字典 winners
 winners = {}
 for city in voting_results["tpp"]:
-    dpp_votes = voting_results["dpp"][city]
-    kmt_votes = voting_results["kmt"][city]
-    tpp_votes = voting_results["tpp"][city]
+    dpp_votes = voting_results["dpp_percentage"][city]
+    kmt_votes = voting_results["kmt_percentage"][city]
+    tpp_votes = voting_results["tpp_percentage"][city]
     
-    if tpp_votes > dpp_votes and tpp_votes > kmt_votes:
+    partys_votes = [tpp_votes, dpp_votes, kmt_votes]
+    voting_results.setdefault("partys_votes", {})[city] = partys_votes
+    
+    if max(partys_votes) == tpp_votes:
         winners[city] = "1"
-    elif dpp_votes > tpp_votes and dpp_votes > kmt_votes:
+    elif max(partys_votes) == dpp_votes:
         winners[city] = "2"
     else:
         winners[city] = "3"
         
 print(winners)
+
+# 計算第一名跟第二名的得票差距
+for city, votes in voting_results["partys_votes"].items():
+    votes.sort(reverse=True)
+    voting_results.setdefault("votes_difference", {})[city] = votes[0] - votes[1]
+    
+print(voting_results["votes_difference"])
+
+# 找到最大的得票差距
+max_votes_difference = max(voting_results["votes_difference"].values())
+print(max_votes_difference)
 
 # 計算各個政黨最高與最低得票率
 tpp_range = min(voting_results["tpp_percentage"].values()), max(voting_results["tpp_percentage"].values())
@@ -57,25 +71,25 @@ print(kmt_range)
 # 根據獲選的政黨，決定每個政黨的顏色（以HSL），其中 L 的範圍會因得票率的映射而不一樣。存成新的字典 colors
 # tpp L: (177, 61, 35~75)
 # dpp L: (130, 60, 25~65)
-# dpp L: (212, 100, 40~80)
+# kmt L: (212, 100, 40~80)
 
 colors = {}
 for city, winner in winners.items():
     if winner == "1":
         tpp_percentage = voting_results["tpp_percentage"][city]
-        tpp_l = int(35 + 40 * (tpp_percentage- tpp_range[0]) / (tpp_range[1] - tpp_range[0]))
+        tpp_l = int(75 - 40 * voting_results["votes_difference"][city] / max_votes_difference)
         rgb_hex = ImageColor.getrgb(f"hsl(177, 61%, {tpp_l}%)")
         colors[city] = f"#{rgb_hex[0]:02x}{rgb_hex[1]:02x}{rgb_hex[2]:02x}"
         
     elif winner == "2":
         dpp_percentage = voting_results["dpp_percentage"][city]
-        dpp_l = int(25 + 40 * (dpp_percentage- dpp_range[0]) / (dpp_range[1] - dpp_range[0]))
+        dpp_l = int(75 - 40 * voting_results["votes_difference"][city] / max_votes_difference)
         rgb_hex = ImageColor.getrgb(f"hsl(130, 60%, {dpp_l}%)")
         colors[city] = f"#{rgb_hex[0]:02x}{rgb_hex[1]:02x}{rgb_hex[2]:02x}"
    
     else:
         kmt_percentage = voting_results["kmt_percentage"][city]
-        kmt_l = int(45 + 40 * (kmt_percentage- kmt_range[0]) / (kmt_range[1] - kmt_range[0]))
+        kmt_l = int(75 - 40 * voting_results["votes_difference"][city] / max_votes_difference)
         rgb_hex = ImageColor.getrgb(f"hsl(212, 100%, {kmt_l}%)")
         colors[city] = f"#{rgb_hex[0]:02x}{rgb_hex[1]:02x}{rgb_hex[2]:02x}"
         
